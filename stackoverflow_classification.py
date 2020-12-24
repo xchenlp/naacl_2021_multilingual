@@ -186,7 +186,8 @@ def parallel_test(parameter_tuple):
             else:
                 labels = []
             ground_truth_groups.append(labels)
-        ground_truths = MultiLabelBinarizer().fit_transform(ground_truth_groups)
+        mlb = MultiLabelBinarizer()
+        ground_truths = mlb.fit_transform(ground_truth_groups)
         predicted_labels = [x for x in df.elmo_pred_intent]
         predicted_label_groups = []
         for group in predicted_labels:
@@ -195,11 +196,11 @@ def parallel_test(parameter_tuple):
             else:
                 labels = []
             predicted_label_groups.append(labels)
-        print('predicted label groups')
-        print(predicted_label_groups)
-        predicted_labels = MultiLabelBinarizer().fit_transform(predicted_label_groups)
-        print('predicted labels')
-        print(predicted_labels)
+        #print('predicted label groups')
+        #print(predicted_label_groups)
+        predicted_labels = mlb.transform(predicted_label_groups)
+        #print('predicted labels')
+        #print(predicted_labels)
         pred_scores = list(df.elmo_pred_conf)
 
         # if starter packs dataset, then determine the optimal threshold using test set,
@@ -257,7 +258,11 @@ def parallel_test(parameter_tuple):
                     if score < fixed_threshold:
                         predicted_labels[i] = 'undefined'
   
-        classification_report_this_fold = classification_report(y_true=ground_truths, y_pred=predicted_labels)
+        tagset = mlb.classes_
+        class_indices = {cls: idx for idx, cls in enumerate(mlb.classes_)}
+
+        classification_report_this_fold = classification_report(y_true=ground_truths, y_pred=predicted_labels, labels=[class_indices[cls] for cls in tagset],
+        target_names=tagset)
         f1_macro_this_fold = f1_score(y_true=ground_truths, y_pred=predicted_labels, average='macro')
         precision_macro_this_fold = precision_score(y_true=ground_truths, y_pred=predicted_labels, average='macro')
         recall_macro_this_fold = recall_score(y_true=ground_truths, y_pred=predicted_labels, average='macro')
@@ -265,6 +270,8 @@ def parallel_test(parameter_tuple):
         with open(classification_report_path, 'wt') as f:
             f.write(classification_report_this_fold)
 
+        with open(report_path, 'wt') as f:
+            f.write(classification_report_this_fold)
         logger.info(f'classification report:\n{classification_report_this_fold}')
         logger.info('*' * 50 + ' ' + 'te' + ' ' + '*' * 50)
         logger.info(f'classification report output path: {classification_report_path}')

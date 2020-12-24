@@ -396,6 +396,96 @@ class SentenceClassificationModel(nn.Module):
             if not args.train_encoder_weights:
                 for p in self.encoder.parameters():
                     p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-300':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_300/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-600':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_600/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-900':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_900/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-1200':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_1200/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-1500':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_1500/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-1800':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_1800/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-2100':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_2100/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-2400':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_2400/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-2700':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_2700/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-3000':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_3000/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-3300':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_3300/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-3600':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_3600/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-3900':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_3900/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-4200':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_4200/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-4500':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_4500/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
         elif self.encoder_name == 'elmo':
             self.encoder = Elmo(args.elmo_option_file, args.elmo_weights_file, 2,
                                 dropout=0, requires_grad=args.train_encoder_weights)
