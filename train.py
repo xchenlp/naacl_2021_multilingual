@@ -376,8 +376,8 @@ def train(model, tr_data_path, va_data_path, cls2ind, batch_size, logger, db_wri
         logger.info(f'Best epoch is {best_va_epoch} with va acc {best_va_acc} and va f1-macro: {best_va_f1_macro}.')
 
     # after training we generate the classification report
-    db_writer.write_entry(timestamp, str(args), best_tr_f1_macro, best_tr_acc, best_tr_epoch,
-                          best_va_f1_macro, best_va_acc, best_va_epoch, epoch, tr_time, va_time, True)
+    #db_writer.write_entry(timestamp, str(args), best_tr_f1_macro, best_tr_acc, best_tr_epoch,
+    #                      best_va_f1_macro, best_va_acc, best_va_epoch, epoch, tr_time, va_time, True)
     if not args.soft_validation_set and not args.no_evaluation:
         true = torch.load(os.path.join(args.save_dir, 'validation_labels.true.pt'))
         pred = torch.load(os.path.join(args.save_dir, 'validation_labels.pred.pt'))
