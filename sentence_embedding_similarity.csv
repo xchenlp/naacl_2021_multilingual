@@ -1,0 +1,15 @@
+word pair,context,"euclidean dist, stack overflow model","normalized euclidean, SO","euclidean dist, general model","normalized euclidean, GM",closer euclidean dist,closer normalized euclidean,expected,agree?,"cosine dist, stack overflow model","cosine dist, general model",closer cosine dist
+Java / coffee,Jerry has had a lot of late nights recently and can't start his day without a cup of {}.,4.281,0.236,3.080,0.170,general model,general model,,,0.02816,0.01453,general model
+Python / snake,I was scared to death when I saw that {}.,5.569,0.307,2.640,0.146,general model,general model,,,0.04663,0.01008,general model
+floats / rafts,"The ship is outfitted with lots of safety featurs, including {} in case of an emergency.",2.699,0.149,2.196,0.121,general model,general model,,,0.01210,0.00672,general model
+terminal / ending,The {} scene of the movie was a big surprise!,2.363,0.130,1.989,0.110,general model,general model,,,0.00759,0.00527,general model
+java / americano,The way they make their {} is my top consideration when I review a new cafe.,2.840,0.157,2.620,0.145,general model,general model,,,0.01297,0.01042,general model
+classes / lectures,Emily had to drop out of school after she missed too many {}.,3.157,0.174,2.886,0.159,general model,general model,,,0.01512,0.01124,general model
+Oracle / Prophet,"In times of uncertainty, people would take offerings to the temple and ask the {} for help.",3.390,0.187,2.716,0.150,general model,general model,,,0.01883,0.01055,general model
+C# / Java,I can't find any code or post on how to get traffic data in {} for Windows Phone 8.,1.713,0.095,3.048,0.168,stack overflow model,stack overflow model,,,0.00424,0.01350,stack overflow model
+PHP / Python,I have {} code for shortening a URL.,2.290,0.126,1.819,0.100,general model,general model,,,0.00687,0.00535,general model
+doubles / floats,Suppose I need to parse space delimited lists of numbers where some lists contain integers and some lists contain {}.,1.709,0.094,2.421,0.134,stack overflow model,stack overflow model,,,0.00401,0.00830,stack overflow model
+command line / terminal,I am a spark newbie and I want to run a Python script from the {}.,1.768,0.098,2.960,0.163,stack overflow model,stack overflow model,,,0.00453,0.01341,stack overflow model
+java / javascript,I import existing {} project in eclipse:,2.487,0.137,2.409,0.133,general model,general model,,,0.00990,0.00997,stack overflow model
+classes / objects,fill up a div with this data with relevent markup - divs id's {} surounding this data.,1.757,0.097,2.520,0.139,stack overflow model,stack overflow model,,,0.00447,0.00969,stack overflow model
+Oracle / DynamoDB,So what I'm doing is reading a lot of data from remote Nettezza database and inserting them into another remote {} database.,1.304,0.072,1.349,0.074,stack overflow model,stack overflow model,,,0.00250,0.00283,stack overflow model
