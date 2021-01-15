@@ -486,6 +486,18 @@ class SentenceClassificationModel(nn.Module):
             if not args.train_encoder_weights:
                 for p in self.encoder.parameters():
                     p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-wiki-3000':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/wiki/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
+        elif self.encoder_name == 'distil-m-bert-so-multi':
+            self.encoder = DistilBertModel.from_pretrained('/data/stack_overflow_distilbert/stack_overflow_multi_language_trained_upon_stack_overflow_3000/')
+            self.hidden_size = self.encoder.config.hidden_size
+            if not args.train_encoder_weights:
+                for p in self.encoder.parameters():
+                    p.requires_grad = False
         elif self.encoder_name == 'elmo':
             self.encoder = Elmo(args.elmo_option_file, args.elmo_weights_file, 2,
                                 dropout=0, requires_grad=args.train_encoder_weights)

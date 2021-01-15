@@ -330,17 +330,18 @@ def train(model, tr_data_path, va_data_path, cls2ind, batch_size, logger, db_wri
 
             if epoch == 1 and not args.soft_validation_set:
                 # save the true labels
-                true_labels = []
-                for binary_values in va_true_labels:
-                    labels = []
-                    i = 0
-                    while i < len(binary_values):
-                        if int(binary_values[i]) == 1:
-                            labels.append(ind2cls[i])
-                        i += 1
-                    true_labels.append('|'.join(sorted(labels)))
-                    #true_labels.append('|'.join([ind2cls[label] for label in group].sort()))
-                torch.save(true_labels, va_labels_save_name + '.true.pt')
+                #true_labels = []
+                #for binary_values in va_true_labels:
+                #    labels = []
+                #    i = 0
+                #    while i < len(binary_values):
+                #        if int(binary_values[i]) == 1:
+                #            labels.append(ind2cls[i])
+                #        i += 1
+                #    #true_labels.append('|'.join(sorted(labels)))
+                #    true_labels.append(labels)
+                #    #true_labels.append('|'.join([ind2cls[label] for label in group].sort()))
+                torch.save(va_true_labels, va_labels_save_name + '.true.pt')
                 #torch.save([ind2cls[x] for y in va_true_labels for x in y], va_labels_save_name + '.true.pt')
 
         if args.no_evaluation or va_f1_macro > best_va_f1_macro:
@@ -352,17 +353,18 @@ def train(model, tr_data_path, va_data_path, cls2ind, batch_size, logger, db_wri
             logger.info(f'saving model at epoch {epoch}')
             # save the best predictions
 
-            if not args.no_evaluation and not args.soft_validation_set:
-                pred_labels = []
-                for binary_values in va_pred_labels:
-                    labels = []
-                    i = 0
-                    while i < len(binary_values):
-                        if int(binary_values[i]) == 1:
-                            labels.append(ind2cls[i])
-                        i += 1
-                    pred_labels.append('|'.join(sorted(labels)))
-                torch.save(pred_labels, va_labels_save_name + '.pred.pt')
+        if not args.no_evaluation and not args.soft_validation_set:
+                #pred_labels = []
+                #for binary_values in va_pred_labels:
+                #    labels = []
+                #    i = 0
+                #    while i < len(binary_values):
+                #        if int(binary_values[i]) == 1:
+                #            labels.append(ind2cls[i])
+                #        i += 1
+                #    #pred_labels.append('|'.join(sorted(labels)))
+                #    pred_labels.append(labels)
+            torch.save(va_pred_labels, va_labels_save_name + '.pred.pt')
                 #torch.save(pred_labels, va_labels_save_name + '.pred.pt')
                 #torch.save([ind2cls[x] for y in va_pred_labels for x in y], va_labels_save_name + '.pred.pt')
         db_writer.write_entry(timestamp, str(args), best_tr_f1_macro, best_tr_acc, best_tr_epoch,
@@ -379,10 +381,13 @@ def train(model, tr_data_path, va_data_path, cls2ind, batch_size, logger, db_wri
     #db_writer.write_entry(timestamp, str(args), best_tr_f1_macro, best_tr_acc, best_tr_epoch,
     #                      best_va_f1_macro, best_va_acc, best_va_epoch, epoch, tr_time, va_time, True)
     if not args.soft_validation_set and not args.no_evaluation:
-        true = torch.load(os.path.join(args.save_dir, 'validation_labels.true.pt'))
-        pred = torch.load(os.path.join(args.save_dir, 'validation_labels.pred.pt'))
+        true = np.array(torch.load(os.path.join(args.save_dir, 'validation_labels.true.pt'))).astype('float')
+        pred = np.array(torch.load(os.path.join(args.save_dir, 'validation_labels.pred.pt'))).astype('float')
         logger.info('best model performance on va set')
-        logger.info(classification_report(y_true=true, y_pred=pred))
+        print(true)
+        print(pred)
+        print([ind2cls[x] for x in range(0,len(ind2cls))])
+        logger.info(classification_report(y_true=true, y_pred=pred, target_names=[ind2cls[x] for x in range(0,len(ind2cls))]))
     else:
         logger.info('No classification report generated.')
 

@@ -36,19 +36,24 @@ def evaluate(data_loader, device, model, set_name, args):
         pred, confidence_score = model(message_tensor, attention_mask=attention_mask)
         confs = torch.nn.functional.softmax(confidence_score, dim=1).cpu().data.numpy()
         max_confs = numpy.amax(confs, 1)
+        #print(pred)
+        #print(confs)
         #pred_labels.extend([ind2cls[int(x)] for y in pred.cpu().data.numpy() for x in y])
        
-        for binary_values in pred.cpu().data.numpy():
-            labels = []
-            i = 0
-            while i < len(binary_values):
-                if int(binary_values[i]) == 1:
-                    labels.append(ind2cls[i])
-                i += 1
-            pred_labels.append('|'.join(sorted(labels)))
-             
-        #for group in pred.cpu().data.numpy():
-        #    pred_labels.append('|'.join([ind2cls[int(label)] for label in group].sort()))
+        #cor binary_values in pred.cpu().data.numpy():
+        #    labels = []
+        #    max_confs = []
+        #    i = 0
+        #    while i < len(binary_values):
+        #        if int(binary_values[i]) == 1:
+        #            labels.append(ind2cls[i])
+        #            max_confs.append(confs[i])
+        #        i += 1
+        #    #pred_labels.append('|'.join(sorted(labels)))
+        #    pred_labels.append(labels) 
+        for group in pred.cpu().data.numpy():
+            pred_labels.append(group)
+        ##    pred_labels.append('|'.join([ind2cls[int(label)] for label in group].sort()))
         
         confs_list.extend([float(x) for x in max_confs])
         print(f'{step} of {data_loader.total_batch} finished')
@@ -178,10 +183,11 @@ def evaluate_with_ground_truth(data_loader, device, model, set_name, args):
         # print(f'conf_per_class_: {conf_per_class_}.')
     # classification report
 
-    labels = list(cls2ind.values())
-    target_names = list(cls2ind.keys())
+    #labels = list(cls2ind.values())
+    #target_names = list(cls2ind.keys())
 
-    print(classification_report(true_labels_flattened, pred_labels_flattened, labels=labels, target_names=target_names))
+    #print(classification_report(true_labels_flattened, pred_labels_flattened, labels=labels, target_names=target_names))
+    print(classification_report(true_labels_flattened, pred_labels_flattened, labels=[ind2cls[x] for x in range(0,len(ind2cls))]))
 
     # confidence sore distribution for sic sentences (< 0.5 conf means wrong classification)
     is_sic_scores = []

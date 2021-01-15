@@ -15,6 +15,7 @@ import pickle
 import numpy
 from copy import deepcopy
 from sklearn.preprocessing import MultiLabelBinarizer
+import re
 
 ################### mutable code starts here
 STARTER_PACKS_DATA = ['CenturyLink', 'Hawaiian', 'Telstra']
@@ -26,46 +27,37 @@ def decode_parameter_tuple(parameter_tuple):
     parameter_dict['tr'] = []
     parameter_dict['va'] = []
     parameter_dict['te'] = []
-    if 'xlt' in parameter_dict['language']:
-        parameter_dict['LABEL_COLUMN_NAME'] = 'answer'
-        if parameter_dict['language'] == 'xlt-eng-esp':
-            parameter_dict['tr'].append('usic_data/tr.json')
-            parameter_dict['va'].append('usic_data/va.json')
-            parameter_dict['te'].append('usic_spanish_data/te.json')
-        if parameter_dict['language'] == 'xlt-eng-por':
-            parameter_dict['tr'].append('usic_data/tr.json')
-            parameter_dict['va'].append('usic_data/va.json')
-            parameter_dict['te'].append('usic_portuguese_data/te.json')
-    elif parameter_dict['data'] == 'usic':
-        parameter_dict['LABEL_COLUMN_NAME'] = 'answer'
-        if 'eng' in parameter_dict['language']:
-            parameter_dict['tr'].append('usic_data/tr.json')
-            parameter_dict['va'].append('usic_data/va.json')
-        if 'esp' in parameter_dict['language']:
-            parameter_dict['tr'].append('usic_spanish_data/tr.json')
-            parameter_dict['va'].append('usic_spanish_data/va.json')
-        if 'por' in parameter_dict['language']:
-            parameter_dict['tr'].append('usic_portuguese_data/tr.json')
-            parameter_dict['va'].append('usic_portuguese_data/va.json')
-        if parameter_dict['language'].startswith('eng'):
-            parameter_dict['te'].append('usic_data/te.json')
-        if parameter_dict['language'].startswith('esp'):
-            parameter_dict['te'].append('usic_spanish_data/te.json')
-        if parameter_dict['language'].startswith('por'):
-            parameter_dict['te'].append('usic_portuguese_data/te.json')
-    elif parameter_dict['data'] in STARTER_PACKS_DATA:
-        parameter_dict['tr'].append(f'''preprocessed_data/{parameter_dict['data']}/tr.json''')
-        parameter_dict['va'].append(f'''preprocessed_data/{parameter_dict['data']}/va.json''')
-        parameter_dict['te'].append(f'''preprocessed_data/{parameter_dict['data']}/te_split.json''')
-        parameter_dict['va_threshold'] = f'''preprocessed_data/{parameter_dict['data']}/va_threshold.json'''
-        parameter_dict['LABEL_COLUMN_NAME'] = 'intent'
-    elif parameter_dict['data'] == 'stackoverflow':
+    if parameter_dict['data'] == 'stackoverflow':
         parameter_dict['LABEL_COLUMN_NAME'] = 'tags'
-        if 'eng' in parameter_dict['language']:
+        if 'xlt' in parameter_dict['language']:
             parameter_dict['tr'].append('stackoverflow_data/eng/posts_train.csv')
             parameter_dict['va'].append('stackoverflow_data/eng/posts_val.csv')
+        else:
+            if 'eng' in parameter_dict['language']:
+                parameter_dict['tr'].append('stackoverflow_data/eng/posts_train.csv')
+                parameter_dict['va'].append('stackoverflow_data/eng/posts_val.csv')
+            if 'esp' in parameter_dict['language']:
+                parameter_dict['tr'].append('stackoverflow_data/esp/es_posts_train.csv')
+                parameter_dict['va'].append('stackoverflow_data/esp/es_posts_val.csv')
+            if 'por' in parameter_dict['language']:
+                parameter_dict['tr'].append('stackoverflow_data/por/pt_posts_train.csv')
+                parameter_dict['va'].append('stackoverflow_data/por/pt_posts_val.csv')
+            if 'rus' in parameter_dict['language']:
+                parameter_dict['tr'].append('stackoverflow_data/rus/ru_posts_train.csv')
+                parameter_dict['va'].append('stackoverflow_data/rus/ru_posts_val.csv')
+            if 'jap' in parameter_dict['language']:
+                parameter_dict['tr'].append('stackoverflow_data/jap/ja_posts_train.csv')
+                parameter_dict['va'].append('stackoverflow_data/jap/ja_posts_val.csv')
         if parameter_dict['language'].startswith('eng'):
             parameter_dict['te'].append('stackoverflow_data/eng/posts_test.csv')
+        if parameter_dict['language'].startswith('esp'):
+            parameter_dict['te'].append('stackoverflow_data/esp/es_posts_test.csv')
+        if parameter_dict['language'].startswith('por'):
+            parameter_dict['te'].append('stackoverflow_data/por/pt_posts_test.csv')
+        if parameter_dict['language'].startswith('rus'):
+            parameter_dict['te'].append('stackoverflow_data/rus/ru_posts_test.csv')
+        if parameter_dict['language'].startswith('jap'):
+            parameter_dict['te'].append('stackoverflow_data/jap/ja_posts_test.csv')
     else:
         raise NotImplementedError
     return parameter_dict
@@ -139,8 +131,9 @@ def parallel_train_eval(parameter_tuple):
     # validation set evaluation
     true = torch.load(os.path.join(model_path, 'validation_labels.true.pt'))
     pred = torch.load(os.path.join(model_path, 'validation_labels.pred.pt'))
+    labels = torch.load(os.path.join(model_path, 'intent_list.pt'))
     logger.info('best model performance on va set')
-    logger.info(classification_report(y_true=true, y_pred=pred))
+    logger.info(classification_report(y_true=true, y_pred=pred, target_names=labels))
     f1_macro_this_fold = f1_score(y_true=true, y_pred=pred, average='macro')
     logger.info(f'f1 this fold = {f1_macro_this_fold}')
 
@@ -176,29 +169,49 @@ def parallel_test(parameter_tuple):
         subprocess.run(cmd)
 
         logger.info('generating classification report')
+        intent_list_save_name = os.path.join(best_model, 'intent_list.pt')
+        intent_list = torch.load(intent_list_save_name)
+        cls2ind = {v: i for i, v in enumerate(intent_list)}
+        ind2cls = {v: k for k, v in cls2ind.items()}
+
         df = read_csv_json(eval_out_path)
-        ground_truths = [x for x in eval(f'df.{LABEL_COLUMN_NAME}')]
-        #print(ground_truths)
-        ground_truth_groups = []
-        for group in eval(f'df.{LABEL_COLUMN_NAME}'):
-            if type(group) == str:
-                labels = group.split('|')
-            else:
-                labels = []
-            ground_truth_groups.append(labels)
-        mlb = MultiLabelBinarizer()
-        ground_truths = mlb.fit_transform(ground_truth_groups)
-        predicted_labels = [x for x in df.elmo_pred_intent]
-        predicted_label_groups = []
-        for group in predicted_labels:
-            if type(group) == str:
-                labels = group.split('|')
-            else:
-                labels = []
-            predicted_label_groups.append(labels)
+        ground_truth_labels = [x for x in eval(f'df.{LABEL_COLUMN_NAME}')]
+        #print(len(ground_truths))
+        ground_truths = []
+        for i in ground_truth_labels:
+            binary_list = [False for x in range(0, len(intent_list))]
+            for l in i.split('|'):
+                binary_list[int(cls2ind[l])] = True
+            ground_truths.append(binary_list)
+        #ground_truth_groups = []
+        #for group in eval(f'df.{LABEL_COLUMN_NAME}'):
+        #    if type(group) == str:
+        #        labels = group.split('|')
+        #    else:
+        #        labels = []
+        #    ground_truth_groups.append(labels)
+        #mlb = MultiLabelBinarizer()
+        #ground_truths = mlb.fit_transform(ground_truths)
+        predictions = [re.sub(']|\[','',x).split() for x in df.elmo_pred_intent]
+        predicted_labels = []
+        for x in predictions:
+            binary_list = []
+            for y in x:
+                if y == 'True':
+                    binary_list.append(True)
+                else:
+                    binary_list.append(False)
+            predicted_labels.append(binary_list)
+        #predicted_label_groups = []
+        #for group in predicted_labels:
+        #    if type(group) == str:
+        #        labels = group.split('|')
+        #    else:
+        #        labels = []
+        #    predicted_label_groups.append(labels)
         #print('predicted label groups')
         #print(predicted_label_groups)
-        predicted_labels = mlb.transform(predicted_label_groups)
+        #predicted_labels = mlb.transform(predicted_label_groups)
         #print('predicted labels')
         #print(predicted_labels)
         pred_scores = list(df.elmo_pred_conf)
@@ -258,11 +271,12 @@ def parallel_test(parameter_tuple):
                     if score < fixed_threshold:
                         predicted_labels[i] = 'undefined'
   
-        tagset = mlb.classes_
-        class_indices = {cls: idx for idx, cls in enumerate(mlb.classes_)}
-
-        classification_report_this_fold = classification_report(y_true=ground_truths, y_pred=predicted_labels, labels=[class_indices[cls] for cls in tagset],
-        target_names=tagset)
+        #tagset = mlb.classes_
+        #class_indices = {cls: idx for idx, cls in enumerate(mlb.classes_)}
+        print(ground_truths)
+        print('\n\n')
+        print(predicted_labels)
+        classification_report_this_fold = classification_report(y_true=ground_truths, y_pred=predicted_labels, target_names=[ind2cls[x] for x in range(0,len(ind2cls))])
         f1_macro_this_fold = f1_score(y_true=ground_truths, y_pred=predicted_labels, average='macro')
         precision_macro_this_fold = precision_score(y_true=ground_truths, y_pred=predicted_labels, average='macro')
         recall_macro_this_fold = recall_score(y_true=ground_truths, y_pred=predicted_labels, average='macro')
@@ -323,7 +337,8 @@ def main(args, logger):
     print('TE SCORE DICTIONARY')
     print(te_score_dict)
     for k, v in te_score_dict.items():
-        append_dict = {**dict(zip(separate_model_parameters, k)), 'test f1 macro score': v}
+        append_dict = {**dict(zip(separate_model_parameters, k)), 'test f1 macro score': v[0], 'test precision macro score': v[1], 'test recall macro score': v[2]}
+        #append_dict = {**dict(zip(separate_model_parameters, k)), 'test f1 macro score': v}
         te_score_df = te_score_df.append(append_dict, ignore_index=True)
 
     data_combined = '_'.join(separate_models['data'])

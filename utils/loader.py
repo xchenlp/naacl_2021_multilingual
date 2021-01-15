@@ -147,6 +147,7 @@ class Loader(object):
           
             # load the data to a list
             if 'multi' in self.args.classifier:
+                print('MULTILABEL EVAL DATA')
                 # if multilabel classification, format labels as a binary list
                 df[self.args.label_column_name] = df[self.args.label_column_name].map(lambda label: label.split('|'))
                 df[self.args.label_column_name] = df[self.args.label_column_name].map(lambda x: self._indices2binarylist(x))
@@ -154,6 +155,7 @@ class Loader(object):
                               eval(f'row.{self.args.label_column_name}'))
                               for row in df.itertuples() if isinstance(eval(f'row.{self.args.text_column_name}'), str)]
             else:
+                print('NOT MULTI LABEL??')
                 self.data = [(eval(f'row.{self.args.text_column_name}'),
                           self.cls2ind[eval(f'row.{self.args.label_column_name}')])
                          for row in df.itertuples() if isinstance(eval(f'row.{self.args.text_column_name}'), str)]
@@ -164,10 +166,10 @@ class Loader(object):
         self.df = df
 
     def _indices2binarylist(self, indices):
-        binary_list = [0 for x in range(0, self.class_num)]
+        binary_list = [False for x in range(0, self.class_num)]
         for i in indices:
-            binary_list[int(self.cls2ind[i])] = 1
-        return(np.array(binary_list, dtype=np.int64))
+            binary_list[int(self.cls2ind[i])] = True
+        return(np.array(binary_list, dtype=np.bool_))
 
     def _load_word2vec_dict(self, encoder):
         self.embedding_size = 300
